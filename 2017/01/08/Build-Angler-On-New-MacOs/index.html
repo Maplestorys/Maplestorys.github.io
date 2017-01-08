@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>Build Angler On New MacOs | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//blog.ghost.org/content/images/2013/Nov/cover.png)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2017-01-08T11:29:27.000Z" itemprop="datePublished">
+          2017-01-08
+      </time>
+    
+    
+    | 
+    <a href='/tags/Android/'>Android</a>
+    
+    
+</span>
+    <h1 class="post-title">Build Angler On New MacOs</h1>
+    <section class="post-content">
+      <p>###Build angler on MacOS<br>Set Proxy to Shadowsocks (not necessary)<br>export http_proxy=socks5://127.0.0.1:1080<br>export https_proxy=socks5://127.0.0.1:1080</p>
+<p>###Instructions<br> <a href="https://wiki.cyanogenmod.org/w/Build_for_angler" target="_blank" rel="external">https://wiki.cyanogenmod.org/w/Build_for_angler</a></p>
+<p>###Hosts<br><a href="https://laod.cn/hosts/2016-google-hosts.html" target="_blank" rel="external">https://laod.cn/hosts/2016-google-hosts.html</a><br>GitHub.com 192.30.253.112</p>
+<p>###Setup Environment For building On Mac<br><a href="https://source.android.com/source/initializing.html" target="_blank" rel="external">https://source.android.com/source/initializing.html</a><br>Sync the code on case-sensitive image</p>
+<p>###Install sed<br>The sed in MacOS is different from other linux<br>brew uninstall gnu-sed<br>brew install gnu-sed –with-default-names<br>You may refer to :<br><a href="http://stackoverflow.com/questions/30003570/how-to-use-gnu-sed-on-mac-os-x" target="_blank" rel="external">http://stackoverflow.com/questions/30003570/how-to-use-gnu-sed-on-mac-os-x</a></p>
+<p>###Install maven<br>brew install maven<br>You may refer to:<br><a href="http://stackoverflow.com/questions/22031889/how-to-install-maven-to-mac-using-terminal-without-using-brew" target="_blank" rel="external">http://stackoverflow.com/questions/22031889/how-to-install-maven-to-mac-using-terminal-without-using-brew</a></p>
+<p>###Install MacOS.sdk 10.11 or early (not necessary if you already have the right version)<br>You may refer to:<br><a href="http://palanceli.com/2016/09/25/2016/0925AOSPOnMac/" target="_blank" rel="external">http://palanceli.com/2016/09/25/2016/0925AOSPOnMac/</a></p>
+<p>###Mount the case-sensitive image and start to get the source code following:<br><a href="https://wiki.cyanogenmod.org/w/Build_for_angler" target="_blank" rel="external">https://wiki.cyanogenmod.org/w/Build_for_angler</a></p>
+<p>###Install repo and add it to Path<br>$ curl <a href="https://storage.googleapis.com/git-repo-downloads/repo" target="_blank" rel="external">https://storage.googleapis.com/git-repo-downloads/repo</a> &gt; ~/bin/repo<br>$ chmod a+x ~/bin/repo<br>set PATH so it includes user’s private bin if it exists<br>if [ -d “$HOME/bin” ] ; then<br>    PATH=”$HOME/bin:$PATH”<br>fi</p>
+<p>###Init repo:<br>$ repo init -u <a href="https://github.com/CyanogenMod/android.git" target="_blank" rel="external">https://github.com/CyanogenMod/android.git</a> -b cm-13.0<br>Change the version as follow<br>13.0 (Android 6.0)<br>14.0 (Android 7.0)<br>14.1 (Android 7.1 )</p>
+<p>###Sync repo:<br>$repo sync -c -j8</p>
+<p>Disable Gello build in device.mk:<br>Cd device/huawei/angler<br>Vim device.mk<br>Gello<br>PRODUCT_PACKAGES += \<br>   Gello</p>
+<p>###Setup Building environments :<br>Source build/envsetup.sh<br>Breakfast angler (angler is the code name for Nexus 6p)<br>Brunch angler (start building)</p>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2017/01/08/Build-Angler-On-New-MacOs/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2017/01/08/Build-Angler-On-New-MacOs/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2017/01/08/Build-Angler-On-New-MacOs/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2017/01/08/hello-world/">
+        Hello World →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>
