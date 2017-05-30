@@ -51,11 +51,10 @@
 </span>
     <h1 class="post-title">从Systrace学习binder kernel 调用过程</h1>
     <section class="post-content">
-      <p>##一.Systrace简介</p>
-<p>从目前使用看来，Systrace主要包含两个部分：<br>1.手机中Systrace日志打印框架<br>2.Chrome或其他日志解析工具，能够将上述生成的日志解析成可视化的图形<br>其精度可以达到ns</p>
+      <h2 id="一-Systrace简介"><a href="#一-Systrace简介" class="headerlink" title="一.Systrace简介"></a>一.Systrace简介</h2><p>从目前使用看来，Systrace主要包含两个部分：<br>1.手机中Systrace日志打印框架<br>2.Chrome或其他日志解析工具，能够将上述生成的日志解析成可视化的图形<br>其精度可以达到ns</p>
 <p>每年的GoogleI/O好像都有提及这个方便的工具，具体的用法的官方教程如下：<br>视频：<br><a href="https://www.youtube.com/watch?v=Qfo5fdoXrTU&amp;index=10&amp;list=PLWz5rJ2EKKc-odHd6XEaf7ykfsosYyCKp" target="_blank" rel="external">https://www.youtube.com/watch?v=Qfo5fdoXrTU&amp;index=10&amp;list=PLWz5rJ2EKKc-odHd6XEaf7ykfsosYyCKp</a><br>文字：<br><a href="https://developer.android.com/studio/profile/systrace.html" target="_blank" rel="external">https://developer.android.com/studio/profile/systrace.html</a></p>
-<p>##二.binder kernel driver<br>binder是android中ipc通信的主要机制<br>其原理可以参考gityuan的博客<br><a href="http://gityuan.com/2015/11/01/binder-driver/" target="_blank" rel="external">http://gityuan.com/2015/11/01/binder-driver/</a><br><a href="http://gityuan.com/2015/11/02/binder-driver-2/" target="_blank" rel="external">http://gityuan.com/2015/11/02/binder-driver-2/</a></p>
-<p>##三.Systrace in binder kernel<br>Systrace 作为android 性能调优的主要手段在源码中随处可见<br>如 AMS 中的 Trace.beginTrace<br>又如 InputDispatcher 中的 ATRACE</p>
+<h2 id="二-binder-kernel-driver"><a href="#二-binder-kernel-driver" class="headerlink" title="二.binder kernel driver"></a>二.binder kernel driver</h2><p>binder是android中ipc通信的主要机制<br>其原理可以参考gityuan的博客<br><a href="http://gityuan.com/2015/11/01/binder-driver/" target="_blank" rel="external">http://gityuan.com/2015/11/01/binder-driver/</a><br><a href="http://gityuan.com/2015/11/02/binder-driver-2/" target="_blank" rel="external">http://gityuan.com/2015/11/02/binder-driver-2/</a></p>
+<h2 id="三-Systrace-in-binder-kernel"><a href="#三-Systrace-in-binder-kernel" class="headerlink" title="三.Systrace in binder kernel"></a>三.Systrace in binder kernel</h2><p>Systrace 作为android 性能调优的主要手段在源码中随处可见<br>如 AMS 中的 Trace.beginTrace<br>又如 InputDispatcher 中的 ATRACE</p>
 <p>想要抓取binder kernel的trace 首先要打开开关<br>其路径如下：<br>/sys/kernel/debug/tracing/events/binder/<br>我们需要将其 enable 置为 1<br>echo 1 &gt; enable</p>
 <p>随后我们可以使用脚本或者android device monitor 抓取 binder kernel driver的日志</p>
 <p>一个简单的调用过程如下<br>其中6834 为 nfc服务的 pid，3412 为 system_server<br>nfc服务向 ams 发起 binder通信</p>
