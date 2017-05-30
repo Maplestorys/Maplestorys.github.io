@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>从Systrace学习binder kernel 调用过程 | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2017-05-30T11:39:51.000Z" itemprop="datePublished">
+          2017-05-30
+      </time>
+    
+    
+    | 
+    <a href='/tags/Android/'>Android</a>
+    
+    
+</span>
+    <h1 class="post-title">从Systrace学习binder kernel 调用过程</h1>
+    <section class="post-content">
+      <p>一.Systrace简介</p>
+<p>从目前使用看来，Systrace主要包含两个部分：<br>1.手机中Systrace日志打印框架<br>2.Chrome或其他日志解析工具，能够将上述生成的日志解析成可视化的图形<br>其精度可以达到ns</p>
+<p>每年的GoogleI/O好像都有提及这个方便的工具，具体的用法的官方教程如下：<br>视频：<br><a href="https://www.youtube.com/watch?v=Qfo5fdoXrTU&amp;index=10&amp;list=PLWz5rJ2EKKc-odHd6XEaf7ykfsosYyCKp" target="_blank" rel="external">https://www.youtube.com/watch?v=Qfo5fdoXrTU&amp;index=10&amp;list=PLWz5rJ2EKKc-odHd6XEaf7ykfsosYyCKp</a><br>文字：<br><a href="https://developer.android.com/studio/profile/systrace.html" target="_blank" rel="external">https://developer.android.com/studio/profile/systrace.html</a></p>
+<p>二.binder kernel driver<br>binder是android中ipc通信的主要机制<br>其原理可以参考gityuan的博客<br><a href="http://gityuan.com/2015/11/01/binder-driver/" target="_blank" rel="external">http://gityuan.com/2015/11/01/binder-driver/</a><br><a href="http://gityuan.com/2015/11/02/binder-driver-2/" target="_blank" rel="external">http://gityuan.com/2015/11/02/binder-driver-2/</a></p>
+<p>三.Systrace in binder kernel<br>Systrace 作为android 性能调优的主要手段在源码中随处可见<br>如 AMS 中的 Trace.beginTrace<br>又如 InputDispatcher 中的 ATRACE</p>
+<p>想要抓取binder kernel的trace 首先要打开开关<br>其路径如下：<br>/sys/kernel/debug/tracing/events/binder/<br>我们需要将其 enable 置为 1<br>echo 1 &gt; enable</p>
+<p>随后我们可以使用脚本或者android device monitor 抓取 binder kernel driver的日志</p>
+<p>一个简单的调用过程如下<br>其中6834 为 nfc服务的 pid，3412 为 system_server<br>nfc服务向 ams 发起 binder通信<br>1.binder 驱动收到 BC_TRANSACTION 的通信请求<br>    创建binder_transaction 结构体，分配内存，并将通信的数据写入内存<br>2.binder 驱动唤醒 system_server处理请求，使用 BR_TRANSACTION 的命令作为标识<br>    system_server从队列中读取通信请求，并将结果写入内存。<br>3.system_server 发起  BC_REPLY 请求，该请求是 ONEWAY 的<br>    binder驱动为新的请求分配内存，并将任务加入到目标进程的队列中<br>4.binder 驱动告知请求端 请求已经完成 BR_TRANSACTION_COMPLETE,并释放内存<br>5.binder驱动 从任务队列中读取前面 BC_REPLY 的通信任务，向服务端发起 BR_TRANSACTION_COMPLETE的请求<br>6.请求端处理 BR_REPLY 的请求<br>需要注意的是每个cmd工作在那个进程中，以及其前后的调用次序</p>
+<p>Systrace 日志：<br>com.android.nfc-6834  ( 6834) [004] …2  1005.674370: binder_command: cmd=0x40406300 BC_TRANSACTION<br>com.android.nfc-6834  ( 6834) [004] …2  1005.674374: binder_transaction: transaction=141734 dest_node=21476 dest_proc=3412 dest_thread=0 reply=0 flags=0x10 code=0x15<br>com.android.nfc-6834  ( 6834) [004] …2  1005.674375: binder_transaction_alloc_buf: transaction=141734 data_size=240 offsets_size=0<br>com.android.nfc-6834  ( 6834) [004] .N.2  1005.674385: binder_write_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674399: binder_transaction_received: transaction=141734<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674400: binder_return: cmd=0x80407202 BR_TRANSACTION<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674401: binder_read_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …1  1005.674403: binder_ioctl_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …1  1005.674621: binder_ioctl: cmd=0xc0306201 arg=0x7be9dd1fa8<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674623: binder_command: cmd=0x40406301 BC_REPLY<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674625: binder_transaction: transaction=141735 dest_node=0 dest_proc=6834 dest_thread=6834 reply=1 flags=0x0 code=0x0<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674627: binder_transaction_alloc_buf: transaction=141735 data_size=328 offsets_size=8<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674633: binder_transaction_fd: transaction=141735 src_fd=276 ==&gt; dest_fd=35<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674634: binder_write_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …1  1005.674635: binder_wait_for_work: proc_work=0 transaction_stack=0 thread_todo=1<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674636: binder_return: cmd=0x7206 BR_TRANSACTION_COMPLETE<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674637: binder_read_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …1  1005.674638: binder_ioctl_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …1  1005.674652: binder_ioctl: cmd=0xc0306201 arg=0x7be9dd21f8<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674653: binder_command: cmd=0x40086303 BC_FREE_BUFFER<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674654: binder_transaction_buffer_release: transaction=141734 data_size=240 offsets_size=0<br>  Binder:3412_8-4646  ( 3412) [004] …2  1005.674656: binder_write_done: ret=0<br>  Binder:3412_8-4646  ( 3412) [004] …1  1005.674656: binder_wait_for_work: proc_work=1 transaction_stack=0 thread_todo=0<br>com.android.nfc-6834  ( 6834) [004] …1  1005.674672: binder_wait_for_work: proc_work=0 transaction_stack=0 thread_todo=1<br>com.android.nfc-6834  ( 6834) [004] …2  1005.674673: binder_return: cmd=0x7206 BR_TRANSACTION_COMPLETE<br>com.android.nfc-6834  ( 6834) [004] …2  1005.674674: binder_transaction_received: transaction=141735<br>com.android.nfc-6834  ( 6834) [004] …2  1005.674675: binder_return: cmd=0x80407203 BR_REPLY</p>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2017/05/30/Some-thing-about-binder-in-kernel/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2017/05/30/Some-thing-about-binder-in-kernel/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2017/05/30/Some-thing-about-binder-in-kernel/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2017/01/08/Build-Angler-On-New-MacOs/">
+        Build Angler On New MacOs →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>
