@@ -47,18 +47,17 @@
     <h1 class="post-title">simple cryptography tools in blockchain</h1>
     <section class="post-content">
       <p>##Hash Function<br>takes any string as input<br>fixed-sized output(usually 256 bits)<br>efficiently computable</p>
-<p>#security properties:<br>collision-free<br>hiding<br>puzzle-friendly</p>
-<p>#SHA-256<br><img src="/img/1.png" alt=""></p>
-<p>#Hash Pointer<br><img src="/img/2.jpg" alt=""></p>
-<p>#Merkle Tree<br><img src="/img/3.png" alt=""></p>
-<p>#Digital signature scheme<br>Only you can sign, but anyone can verify</p>
+<h2 id="security-properties"><a href="#security-properties" class="headerlink" title="security properties:"></a>security properties:</h2><p>collision-free<br>hiding<br>puzzle-friendly</p>
+<h2 id="SHA-256"><a href="#SHA-256" class="headerlink" title="SHA-256"></a>SHA-256</h2><p><img src="/img/1.png" alt=""></p>
+<h2 id="Hash-Pointer"><a href="#Hash-Pointer" class="headerlink" title="Hash Pointer"></a>Hash Pointer</h2><p><img src="/img/2.jpg" alt=""></p>
+<h2 id="Merkle-Tree"><a href="#Merkle-Tree" class="headerlink" title="Merkle Tree"></a>Merkle Tree</h2><p><img src="/img/3.png" alt=""></p>
+<h2 id="Digital-signature-scheme"><a href="#Digital-signature-scheme" class="headerlink" title="Digital signature scheme"></a>Digital signature scheme</h2><p>Only you can sign, but anyone can verify</p>
 <ul>
 <li>(sk, pk) := generateKeys(keysize)</li>
 <li>sig := sign(sk, message)</li>
-<li>isValid := verify(pk, message, sig)<br>#Public keys as Identities<br>A useful trick as Bitcoin do</li>
+<li>isValid := verify(pk, message, sig)<h2 id="Public-keys-as-Identities"><a href="#Public-keys-as-Identities" class="headerlink" title="Public keys as Identities"></a>Public keys as Identities</h2>A useful trick as Bitcoin do</li>
 </ul>
-<p>#A Simple Cryptocurrency Example</p>
-<ul>
+<h2 id="A-Simple-Cryptocurrency-Example"><a href="#A-Simple-Cryptocurrency-Example" class="headerlink" title="A Simple Cryptocurrency Example"></a>A Simple Cryptocurrency Example</h2><ul>
 <li>GoofyCoin<br>1.Goofy, can create new coins whenever he wants and these newly created coins belong to him<br>2.whoever owns a coin can transfer it on to someone else<br><img src="/img/4.png" alt=""><br>double‐spending attack — Alice is spending the same coin twice.</li>
 <li>ScroogeCoin<br>Scrooge publishes an append‐only ledger containing the history of all the transactions that have happened.<br>ScroogeCoin block chain.<br><img src="/img/5.png" alt=""><br>CreateCoins transaction.<br><img src="/img/6.png" alt=""><br>A PayCoins Transaction.<br><img src="/img/7.png" alt=""></li>
 </ul>
