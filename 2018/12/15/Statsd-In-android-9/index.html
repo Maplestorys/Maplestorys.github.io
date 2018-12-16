@@ -46,9 +46,9 @@
 </span>
     <h1 class="post-title">Statsd In android 9 （1）</h1>
     <section class="post-content">
-      <p>android系统中有很多不同功能的日志，如dumpsys dumpstate。anr以及crash时候也有单点的日志。然而，<br>一些系统的问题，如性能功耗以及稳定性问题是由于不明确的单点的缺陷或者故障扩散导致的。仅靠最后问题发生<br>时的日志有时难以定位问题，还有一些问题，例如黑屏，原因有很多种，所以能否将可能相关的事件汇聚到一处，<br>做数据分析也会方便一些。大概基于这种目的，android p版本中新增一种日志上报方式</p>
+      <p>android系统中有很多不同功能的日志，如dumpsys dumpstate。anr以及crash时候也有单点的日志。然而，<br>一些系统的问题，如性能功耗以及稳定性问题是由于不明确的单点的缺陷或者故障扩散导致的。仅靠最后问题发生<br>时的日志有时难以定位问题，还有一些问题，例如黑屏，原因有很多种，所以能否将可能相关的事件汇聚到一处，<br>做数据分析也会方便一些。大概基于这种目的，android p版本中新增一种日志上报方式，接口位于：</p>
 <pre><code>android.util.StatsLog
-</code></pre><p>新增一个用于处理统计数据的常驻进程 statsd</p>
+</code></pre><p>新增一个用于处理统计数据的常驻进程 statsd<br>statsd 与logd一样使用sock收集日志<br>所有日志上报函数均直接使用入参写入sock，没有中间数据接口<br>statsd的收集在java以及native均有涉及，包含pull 以及 push两个模式</p>
 <p>下面部分代码引用自 aosp android-9.0.0_r22</p>
 <h4 id="StatsLog接口类"><a href="#StatsLog接口类" class="headerlink" title="StatsLog接口类"></a>StatsLog接口类</h4><p>StatsLog类继承于StatsLogInternal，而StatsLogInternal是在编译期由protobuf自动生成的，主要<br>是一些常量以及数据结构的定义。<br>StatsLog类中主要有3个接口,是通过binder调用到服务端：</p>
 <pre><code>public static boolean logStart(int label)  //开始记录过程类事件
