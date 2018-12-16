@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>Statsd In android 9 （1） | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//maplestorys.github.io/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2018-12-15T13:39:17.000Z" itemprop="datePublished">
+          2018-12-15
+      </time>
+    
+</span>
+    <h1 class="post-title">Statsd In android 9 （1）</h1>
+    <section class="post-content">
+      <p>android系统中有很多不同功能的日志，如dumpsys dumpstate。anr以及crash时候也有单点的日志。然而，<br>一些系统的问题，如性能功耗以及稳定性问题是由于不明确的单点的缺陷或者故障扩散导致的。仅靠最后问题发生<br>时的日志有时难以定位问题，还有一些问题，例如黑屏，原因有很多种，所以能否将可能相关的事件汇聚到一处，<br>做数据分析也会方便一些。大概基于这种目的，android p版本中新增一种日志上报方式</p>
+<pre><code>android.util.StatsLog
+</code></pre><p>新增一个用于处理统计数据的常驻进程 statsd</p>
+<p>下面部分代码引用自 aosp android-9.0.0_r22</p>
+<h4 id="StatsLog接口类"><a href="#StatsLog接口类" class="headerlink" title="StatsLog接口类"></a>StatsLog接口类</h4><p>StatsLog类继承于StatsLogInternal，而StatsLogInternal是在编译期由protobuf自动生成的，主要<br>是一些常量以及数据结构的定义。<br>StatsLog类中主要有3个接口,是通过binder调用到服务端：</p>
+<pre><code>public static boolean logStart(int label)  //开始记录过程类事件
+public static boolean logStop(int label)   //停止记录过程类事件
+public static boolean logEvent(int label)  //记录结果类事件
+</code></pre><p>还有从Internal类里继承而来的native方法，framework中上报的方法使用的是write，以及 write_non_chained</p>
+<pre><code>public static native int write(int code);
+... ...
+public static native int write_non_chained(int code, int arg1, java.lang.String arg2, int arg3);
+</code></pre><p>其他都是同名的重载函数，<br>最终调用的函数位于：</p>
+<blockquote>
+<p>out/soong/.intermediates/frameworks/base/tools/stats_log_api_gen/statslog.h/gen/statslog.h<br>system/core/libstats/include/stats_event_list.h<br>stats_event_list.write</p>
+</blockquote>
+<pre><code>try_stats_write(int32_t code, char const* arg1, int64_t arg2)
+{
+  if (kStatsdEnabled) {
+    stats_event_list event(kStatsEventTag);
+    event &lt;&lt; android::elapsedRealtimeNano();
+
+    event &lt;&lt; code;
+
+    if (arg1 == NULL) {
+        arg1 = &quot;&quot;;
+    }
+    event &lt;&lt; arg1;
+    event &lt;&lt; arg2;
+    return event.write(LOG_ID_STATS);
+  } else {
+    return 1;
+  }
+}
+</code></pre><p>stats_event_list创建一个以事件为id的logger，并把信息写入，缓存，最后使用write_to_logger，<br>将android_log_context写入logger。</p>
+<pre><code>int write(log_id_t id = LOG_ID_EVENTS) {
+    // facilitate -EBUSY retry
+    if ((ret == -EBUSY) || (ret &gt; 0)) {
+        ret = 0;
+    }
+    int retval = write_to_logger(ctx, id);
+    // existing errors trump transmission errors
+    if (!ret) {
+        ret = retval;
+    }
+    return ret;
+}
+</code></pre><p>一开始以为通过binder调用写入事件，这里看起来为了提高性能使用的还是native的方法， 并且通过直接用函数<br>入参的方式来减少结构封包解包的性能开销。由于没有封包的过程，造成了参数不同的重载函数很多，这里使用<br>自动生成的方式生成了很多函数。所以这几个类都在 out/soong/.intermediates/里。</p>
+<blockquote>
+<p>system/core/libstats/stats_event_list.h</p>
+</blockquote>
+<pre><code>int write_to_logger(android_log_context ctx, log_id_t id) {
+    int retValue = 0;
+
+    if (WRITE_TO_LOGD) {
+        retValue = android_log_write_list(ctx, id);
+    }
+
+    if (WRITE_TO_STATSD) {
+        // log_event_list&apos;s cast operator is overloaded.
+        int ret = stats_write_list(ctx);
+        // In debugging phase, we may write to both logd and statsd. Prefer to
+        // return statsd socket write error code here.
+        if (ret &lt; 0) {
+            retValue = ret;
+        }
+    }
+
+    return retValue;
+}
+</code></pre><p>最后可以选择是直接将事件输出到 logd中还是输出到statsd中。当然，无论是logd或是statsd都是通过<br>sock写入的。</p>
+<h4 id="statsd服务"><a href="#statsd服务" class="headerlink" title="statsd服务"></a>statsd服务</h4><p>statsd 服务分为两个部分，一部分是java的服务代理，用于在java侧提供接口，并注册一些服务监听。<br>如应用安装更新等。</p>
+<blockquote>
+<p>StatsCompanionService.java</p>
+</blockquote>
+<pre><code>traceBeginAndSlog(&quot;StartStatsCompanionService&quot;);
+mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
+traceEnd();
+</code></pre><p>另一部分运行在native的statsd中。</p>
+<blockquote>
+<p>frameworks/base/cmds/statsd/src/main.cpp</p>
+</blockquote>
+<pre><code>// Set up the binder
+sp&lt;ProcessState&gt; ps(ProcessState::self());
+ps-&gt;setThreadPoolMaxThreadCount(9);
+ps-&gt;startThreadPool();
+ps-&gt;giveThreadPoolName();
+IPCThreadState::self()-&gt;disableBackgroundScheduling(true);
+
+// Create the service
+sp&lt;StatsService&gt; service = new StatsService(looper);
+if (defaultServiceManager()-&gt;addService(String16(&quot;stats&quot;), service) != 0) {
+    ALOGE(&quot;Failed to add service&quot;);
+    return -1;
+}
+service-&gt;sayHiToStatsCompanion();
+
+service-&gt;Startup();
+
+sp&lt;StatsSocketListener&gt; socketListener = new StatsSocketListener(service);
+
+if (kUseLogd) {
+    ALOGI(&quot;using logd&quot;);
+    // Start the log reader thread
+    status_t err = start_log_reader_thread(service);
+    if (err != NO_ERROR) {
+        return 1;
+    }
+}
+
+if (kUseStatsdSocket) {
+    ALOGI(&quot;using statsd socket&quot;);
+    // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
+    if (socketListener-&gt;startListener(600)) {
+        exit(1);
+    }
+}
+
+// Loop forever -- the reports run on this thread in a handler, and the
+// binder calls remain responsive in their pool of one thread.
+while (true) {
+    looper-&gt;pollAll(-1);
+}
+</code></pre>
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2018/12/15/Statsd-In-android-9/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/12/15/Statsd-In-android-9/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2018/12/15/Statsd-In-android-9/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2018/11/20/关于Android稳定性的一些思考/">
+        Android Reliability →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>

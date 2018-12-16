@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>Android Reliability | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//maplestorys.github.io/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2018-11-20T14:52:34.000Z" itemprop="datePublished">
+          2018-11-20
+      </time>
+    
+</span>
+    <h1 class="post-title">Android Reliability</h1>
+    <section class="post-content">
+      <p>稳定 顾名思义 指的是系统以及应用正常工作的状态，但由于各种原因系统或者应用工作在不正常的状态，例如应用卡顿，闪退，系统卡死黑屏乃至重启。<br>关于稳定性工作，一般也就分成两个方面<br>    1.定位增强–如何能够尽快正向解决问题<br>    2.容错恢复设计–在问题发生时如何能尽量减少异常的时间<br>这两个方面在原生系统（谷歌aosp）中已经有着不少体现。并且这两个方面应该说是相辅相成的。<br>如在应用anr时会有anr日志，同时提示用户等待或者停止应用，再如watchdog时会先抓去watchdog日志，并重启虚拟机。<br>从大部分问题发生的原因来看主要有以下几个问题：<br>    1.异常场景判断不够 （如并发访问<br>    2.设计时序错误  （如环形依赖的服务<br>    3.编码规范 （如判空、fd有效判断<br>如何做好稳定性工作？<br>    1.前端上代码静态检查，流程上代码review，设计上进行多方考虑。<br>    2.问题发生时的现场抓取能力构建。<br>        任何问题的检测都是有开销的，理想的场景是在内部用户测试时尽量抓取全的日志，而在商用上关闭所有的日志。<br>        可以考虑的是一直抓取日志，并打包。在问题发生时提取时间点前后一段时间的日志。<br>        重新定义一套日志标签，用于提取问题的发生时的特征，用户上报问题的现象作为分类的结果-<br>        利用专家知识，对日志做初步的筛选，分类，提高开发定位效率。<br>        除了流水日志外，各种栈或者dumpsys的抓取时机也十分重要。能否在正确的时间抓取也是需要考量的地方-<br>常用的一些日志：<br>    由于底层是linux大部分日志或者系统状态都能够通过sys/fs 或者 proc节点下获得。<br>    framework层有各种dumpsys，并且还有 app日志以及event日志</p>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2018/11/20/关于Android稳定性的一些思考/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/11/20/关于Android稳定性的一些思考/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2018/11/20/关于Android稳定性的一些思考/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <a class="newer-posts" href="/2018/12/15/Statsd-In-android-9/">
+        ← Statsd In android 9 （1）
+    </a>
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2018/02/06/Decentralization-in-Bitcoin/">
+        Decentralization in Bitcoin →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>
