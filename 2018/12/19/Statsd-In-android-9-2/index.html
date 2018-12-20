@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>Statsd In android 9 (2) | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//maplestorys.github.io/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2018-12-19T15:09:27.000Z" itemprop="datePublished">
+          2018-12-19
+      </time>
+    
+</span>
+    <h1 class="post-title">Statsd In android 9 (2)</h1>
+    <section class="post-content">
+      <p>前面一部分已经介绍了statsd上报使用的两个接口<br>Java侧使用StatsLog<br>Native侧使用android::util::stats_write<br>最终都通过sock写入statsd中，下面将先介绍statsd的daemon部分的结构，随后介绍事件的管理。</p>
+<p>statsd位于frameworks/base/cmds/statsd路径下<br>其目录结构：<br>statsd<br>—-benchmark<br>—-src<br>    —-anomaly       \异常事件触法跟踪管理<br>    —-condition     \根据当前条件触法新的事件<br>    —-config        \配置管理<br>    —-external      \事件拉取管理<br>    —-guardrail     \事件数量管理<br>    —-logd          \循环读取日志事件并分发<br>    —-matchers      \事件匹配，一类Matcher跟踪一类事件<br>    —-metrics       \事件参数计算，将计算结果保存或者上报<br>    —-packages      \缓存应用信息，包含包名以及版本号<br>    —-perfetto      \数据源配置描述<br>    —-socket        \日志sock监听<br>    —-storage       \日志文件写入，配置读取<br>    —-subscriber    \事件订阅通知<br>—-tests             \单元测试<br>—-tools             \功能测试</p>
+<p>那么还是先从main函数看该服务的初始化<br>有一下几个步骤：<br>1.启动Looper<br>2.配置Binder<br>3.与Java服务通信，确认启动<br>4.根据配置看是从logd读取事件还是从socket中读取事件，前面一部分也看到了<br>在日志上报时，具体写入到logd或者statsd也是由配置控制的<br>5.循环从looper中读取事件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">int main(int /*argc*/, char** /*argv*/) &#123;</div><div class="line">    // Set up the looper</div><div class="line">    sp&lt;Looper&gt; looper(Looper::prepare(0 /* opts */));</div><div class="line"></div><div class="line">    // Set up the binder</div><div class="line">    sp&lt;ProcessState&gt; ps(ProcessState::self());</div><div class="line">    ps-&gt;setThreadPoolMaxThreadCount(9);</div><div class="line">    ps-&gt;startThreadPool();</div><div class="line">    ps-&gt;giveThreadPoolName();</div><div class="line">    IPCThreadState::self()-&gt;disableBackgroundScheduling(true);</div><div class="line"></div><div class="line">    // Create the service</div><div class="line">    sp&lt;StatsService&gt; service = new StatsService(looper);</div><div class="line">    if (defaultServiceManager()-&gt;addService(String16(&quot;stats&quot;), service) != 0) &#123;</div><div class="line">        ALOGE(&quot;Failed to add service&quot;);</div><div class="line">        return -1;</div><div class="line">    &#125;</div><div class="line">    service-&gt;sayHiToStatsCompanion();</div><div class="line"></div><div class="line">    service-&gt;Startup();</div><div class="line"></div><div class="line">    sp&lt;StatsSocketListener&gt; socketListener = new StatsSocketListener(service);</div><div class="line"></div><div class="line">    if (kUseLogd) &#123;</div><div class="line">        ALOGI(&quot;using logd&quot;);</div><div class="line">        // Start the log reader thread</div><div class="line">        status_t err = start_log_reader_thread(service);</div><div class="line">        if (err != NO_ERROR) &#123;</div><div class="line">            return 1;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (kUseStatsdSocket) &#123;</div><div class="line">        ALOGI(&quot;using statsd socket&quot;);</div><div class="line">        // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value</div><div class="line">        if (socketListener-&gt;startListener(600)) &#123;</div><div class="line">            exit(1);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Loop forever -- the reports run on this thread in a handler, and the</div><div class="line">    // binder calls remain responsive in their pool of one thread.</div><div class="line">    while (true) &#123;</div><div class="line">        looper-&gt;pollAll(-1 /* timeoutMillis */);</div><div class="line">    &#125;</div><div class="line">    ALOGW(&quot;statsd escaped from its loop.&quot;);</div><div class="line"></div><div class="line">    return 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>下面以socket日志读取为例子来观察日志的流向<br>主线程启动后开始不断从socket中读取事件，并把日志事件发送给服务<br>具体来说就是<br>1.创建一块足够大小的buffer<br>2.从socket中读取事件到构造好的内存结构中（这块暂时还没看明白- -<br>3.校验头部<br>4.包装成Event事件<br>5.调用服务的OnLogEvent处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line">bool StatsSocketListener::onDataAvailable(SocketClient* cli) &#123;</div><div class="line">    static bool name_set;</div><div class="line">    if (!name_set) &#123;</div><div class="line">        prctl(PR_SET_NAME, &quot;statsd.writer&quot;);</div><div class="line">        name_set = true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // + 1 to ensure null terminator if MAX_PAYLOAD buffer is received</div><div class="line">    char buffer[sizeof_log_id_t + sizeof(uint16_t) + sizeof(log_time) + LOGGER_ENTRY_MAX_PAYLOAD +</div><div class="line">                1];</div><div class="line">    struct iovec iov = &#123;buffer, sizeof(buffer) - 1&#125;;</div><div class="line"></div><div class="line">    alignas(4) char control[CMSG_SPACE(sizeof(struct ucred))];</div><div class="line">    struct msghdr hdr = &#123;</div><div class="line">            NULL, 0, &amp;iov, 1, control, sizeof(control), 0,</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    int socket = cli-&gt;getSocket();</div><div class="line"></div><div class="line">    // To clear the entire buffer is secure/safe, but this contributes to 1.68%</div><div class="line">    // overhead under logging load. We are safe because we check counts, but</div><div class="line">    // still need to clear null terminator</div><div class="line">    // memset(buffer, 0, sizeof(buffer));</div><div class="line">    ssize_t n = recvmsg(socket, &amp;hdr, 0);</div><div class="line">    if (n &lt;= (ssize_t)(sizeof(android_log_header_t))) &#123;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    buffer[n] = 0;</div><div class="line"></div><div class="line">    struct ucred* cred = NULL;</div><div class="line"></div><div class="line">    struct cmsghdr* cmsg = CMSG_FIRSTHDR(&amp;hdr);</div><div class="line">    while (cmsg != NULL) &#123;</div><div class="line">        if (cmsg-&gt;cmsg_level == SOL_SOCKET &amp;&amp; cmsg-&gt;cmsg_type == SCM_CREDENTIALS) &#123;</div><div class="line">            cred = (struct ucred*)CMSG_DATA(cmsg);</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">        cmsg = CMSG_NXTHDR(&amp;hdr, cmsg);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    struct ucred fake_cred;</div><div class="line">    if (cred == NULL) &#123;</div><div class="line">        cred = &amp;fake_cred;</div><div class="line">        cred-&gt;pid = 0;</div><div class="line">        cred-&gt;uid = DEFAULT_OVERFLOWUID;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    char* ptr = ((char*)buffer) + sizeof(android_log_header_t);</div><div class="line">    n -= sizeof(android_log_header_t);</div><div class="line"></div><div class="line">    log_msg msg;</div><div class="line"></div><div class="line">    msg.entry.len = n;</div><div class="line">    msg.entry.hdr_size = kLogMsgHeaderSize;</div><div class="line">    msg.entry.sec = time(nullptr);</div><div class="line">    msg.entry.pid = cred-&gt;pid;</div><div class="line">    msg.entry.uid = cred-&gt;uid;</div><div class="line"></div><div class="line">    memcpy(msg.buf + kLogMsgHeaderSize, ptr, n + 1);</div><div class="line">    LogEvent event(msg);</div><div class="line"></div><div class="line">    // Call the listener</div><div class="line">    mListener-&gt;OnLogEvent(&amp;event, false /*reconnected, N/A in statsd socket*/);</div><div class="line"></div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2018/12/19/Statsd-In-android-9-2/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/12/19/Statsd-In-android-9-2/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2018/12/19/Statsd-In-android-9-2/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2018/12/15/Statsd-In-android-9/">
+        Statsd In android 9 （1） →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>
