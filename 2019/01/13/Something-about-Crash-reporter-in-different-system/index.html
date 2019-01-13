@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>Something about Crash reporter in different system | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//maplestorys.github.io/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2019-01-13T06:57:22.000Z" itemprop="datePublished">
+          2019-01-13
+      </time>
+    
+</span>
+    <h1 class="post-title">Something about Crash reporter in different system</h1>
+    <section class="post-content">
+      <h3 id="通用"><a href="#通用" class="headerlink" title="通用"></a>通用</h3><p>这里所描述的都指的是用户态的crash，kernel的crash的处理方式略有区别。本文只是简述crash信息保存的<br>流程。</p>
+<p>在linux系统上，应用异常是通过信号从内核通知上来的，在用户态注册的信号处理函数能够保存一些信息，<br>在信号处理函数运行完成之后，kernel可能会进行一些core dump，这取决于配置。</p>
+<p>当用户态crash时，信号传递给预先注册的signal handler，这时crash尚处于active状态，signal<br>handler运行在同一个进程里，此时也可以通知外部的进程，例如tombstoned，进行dump操作。</p>
+<p>大致需要保存的信息主要来源于1.procfs 2.ptrace 3.logs 4.traces<br>procfs在进程尚未退出之前都会存在，可以从中保存maps、cmd line、 stat等信息<br>ptrace系统调用能够查看被监听进程的内存、寄存器.<br>logs包括 dev/kmsg 的 kernel日志</p>
+<h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><p>在Android上使用 debuggerd tombstoned以及crash_dump进行crash事件日志的收集。<br>tombstoned是一个常驻的daemon，用于crash事件的处理，crash_dump在crash发生时启动，dump其stack以及<br>register信息，debuggerd充当连接两者的作用。<br>由于java crash与native crash的处理流程略有差异，这里只介绍native crash的流程<br>主要流程：<br>1.bionic库中的linker初始化过程中进行debuggerd客户端的初始化<br>2.在crash发生时运行预先注册的信号处理函数，设置相关flag，clone 一个进程进行dump，原进程等待dump结束。<br>3.子进程中运行crash_dump,会fork出新进程，从clone的进程中读取所需的数据.<br>5.crash_dump将数据写入tombstoned(g_output_fd)<br>  在dump完成后会通知<br>6.tombstoned生成tombstone文件</p>
+<h3 id="Chromium-OS‎"><a href="#Chromium-OS‎" class="headerlink" title="Chromium OS‎"></a>Chromium OS‎</h3><p>Chromium OS‎ 也是基于linux内核，所以应该有着相似的机制.<br>所有crash的异常从kernel触发，但Chromium os并未使用signal返回到用户态进行处理，而是<br>1.进行coredump，并将crash进程信息连同coredump一同发送给crash_reporter<br>  这时kernel 2.6.19的新增机制，使用| (pipe symbol) 将core dumps发送到用户进程<br>  refs：<br>  <a href="http://man7.org/linux/man-pages/man5/core.5.html" target="_blank" rel="noopener">http://man7.org/linux/man-pages/man5/core.5.html</a><br>2.当然，应用也可以使用signal机制进行触发，一般使用的是谷歌的breakpad或者crashpad进行收集<br>  这种机制类似与Android的机制，只是信号处理者从debuggerd的hanlder换成了breakapd<br>3.crash_reporter coredump转换成minidump，并定期上传<br>4.如果应用自行注册信号处理，并在处理完成之后退出，则不会产生core dump信息，也不会发送给crash_reporter</p>
+<h3 id="Fuchsia"><a href="#Fuchsia" class="headerlink" title="Fuchsia"></a>Fuchsia</h3><p>Fuchsia 使用名为zircon的内核，所以并不使用signal作为crash的触发源。运行实体也略有差异。<br>对于一个内核对象，总是会有一个Exception Port，用于处理该对象的异常。<br>这个对象可以是线程，进程抑或是一个任务。<br>一个用户态的对象能够通过bind的方式对另一个对象的异常进行监听。<br>这个过程由系统调用完成-zx_task_bind_exception_port<br>refs:<br><a href="https://fuchsia.googlesource.com/zircon/+/master/docs/exceptions.md" target="_blank" rel="noopener">https://fuchsia.googlesource.com/zircon/+/master/docs/exceptions.md</a><br>所以可以在一个用户态进程里bind所有的进程或者线程异常？</p>
+<p>从提交记录来看Google 的CrashPad是支持fuchsia的<br>refs:<br><a href="https://chromium-review.googlesource.com/q/+fuchsia+project:crashpad/crashpad,225" target="_blank" rel="noopener">https://chromium-review.googlesource.com/q/+fuchsia+project:crashpad/crashpad,225</a><br>可以考虑从其实现中查看一般的crash记录流程。</p>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2019/01/13/Something-about-Crash-reporter-in-different-system/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/01/13/Something-about-Crash-reporter-in-different-system/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2019/01/13/Something-about-Crash-reporter-in-different-system/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2019/01/02/Statsd-In-android-9-3/">
+        Statsd In android 9(3) →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>
