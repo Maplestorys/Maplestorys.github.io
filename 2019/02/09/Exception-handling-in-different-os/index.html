@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>Exception handling in different os | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//maplestorys.github.io/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2019-02-09T09:02:08.000Z" itemprop="datePublished">
+          2019-02-09
+      </time>
+    
+</span>
+    <h1 class="post-title">Exception handling in different os</h1>
+    <section class="post-content">
+      <h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><p>Android 基于linux内核，使用 signal机制监听异常发生。值得一提的是，android 在自定义的libc库中(bionic)的linker初始化中会将debuggerd handler注册为默认的signal handler</p>
+<h4 id="Kernel-linux"><a href="#Kernel-linux" class="headerlink" title="Kernel (linux)"></a>Kernel (linux)</h4><p>在cpu运行时发生错误，linux为这类错误注册了默认的异常处理程序，异常处理程序将执行：<br>1.保存大部分寄存器的内容<br>2.使用高级的C函数处理异常（向异常调用进程发送信号），在用户态处理异常（由于libc库中注册了默认处理函数，所以会在用户态处理函数）<br>3.通过ret_from_exception()从异常处理程序中退出</p>
+<h4 id="Native-Process"><a href="#Native-Process" class="headerlink" title="Native Process"></a>Native Process</h4><p>Native进程直接使用signal机制进行异常处理，既可以使用默认的signal_handler，也可以使用自定义的。默认的signal handler将在自定义的处理完成之后继续执行。在此层开发应用的开发者可以使用signal来感知异常的发生。</p>
+<h4 id="Runtime-Process"><a href="#Runtime-Process" class="headerlink" title="Runtime Process"></a>Runtime Process</h4><p>取决于Runtime自己的实现<br>ART会在启动时注册Signal SEGV，将由kernel产生的异常解释成Java的异常<br>Java的异常会在调用链上抛出，直到被捕获，如果该异常在整个调用过程中没有被捕获会触发默认的异常处理函数，UncaughtExceptionHandler。虚拟机进程在API中提供setUncaughtException接口，为开发者提供VM级别的异常的感知。<br>当然，VM Process通过jni依然能够使用signal机制来感知native的异常。</p>
+<h4 id="Excecption-Collector"><a href="#Excecption-Collector" class="headerlink" title="Excecption Collector"></a>Excecption Collector</h4><p>Android提供系统级的异常事件收集器，所有运行的进程在默认配置下最终会调用addErroToDropBox将异常日志保存只dropbox路径，以便统一打包。由于DropBoxManagerService属于AOSP，这里只包含了打包以及管理的部分， 并不包含上传云端的部分。<br>本地使用firebase，云端使用android vitals</p>
+<h4 id="Recovery-API"><a href="#Recovery-API" class="headerlink" title="Recovery API"></a>Recovery API</h4><p>未提供异常恢复相关API</p>
+<h3 id="ChromeOs"><a href="#ChromeOs" class="headerlink" title="ChromeOs"></a>ChromeOs</h3><p>ChromeOs可以近似理解为在linux(非GUI)+chrome（GUI）。所以大部分的机制与Android类似，区别在于ChromeOs未为所有进程注册统一的默认的用户态异常处理程序。ChromeOs能够运行 1.Chrome App，运行在chrome的容器里，使用H5 Js以及css编写<br>2.Android App，运行在Android Runtime for chrome(ARC)里<br>3.linux原生App，</p>
+<h4 id="Kernel-linux-1"><a href="#Kernel-linux-1" class="headerlink" title="Kernel (linux)"></a>Kernel (linux)</h4><p>ChromeOs与Android区别在于没有默认注册的用户态异常处理程序，默认的处理方式为<br>1.coredump<br>2.send coredump to crash reporter<br>可以通过修改 /proc/sys/kernel/core_pattern 来修改默认的异常收集器</p>
+<h4 id="Native-Process-1"><a href="#Native-Process-1" class="headerlink" title="Native Process"></a>Native Process</h4><p>与 Android 类似</p>
+<h4 id="Runtime-Process-1"><a href="#Runtime-Process-1" class="headerlink" title="Runtime Process"></a>Runtime Process</h4><p>与 Android 类似</p>
+<h4 id="Excecption-Collector-1"><a href="#Excecption-Collector-1" class="headerlink" title="Excecption Collector"></a>Excecption Collector</h4><p>ChromeOs使用crash reporter收集异常信息,产生统计信息，并定期上报云端。</p>
+<h4 id="Recovery-API-1"><a href="#Recovery-API-1" class="headerlink" title="Recovery API"></a>Recovery API</h4><p>未提供异常恢复相关API</p>
+<p>基于liunx的系统在kernel、Native Process、以及Vm Process上有着相似的实现方式，因为其都是基于Signal机制的。而在最终的异常事件收集器上有所差异。</p>
+<h3 id="MacOs-iOS"><a href="#MacOs-iOS" class="headerlink" title="MacOs(iOS)"></a>MacOs(iOS)</h3><p>iOS以及MacOs在架构上类似，并且使用相同的内核XNU，这是一个混合内核。 XNU包含Mach(微内核)，bsd的实现是对Mach的封装。</p>
+<h4 id="Kernel-mach"><a href="#Kernel-mach" class="headerlink" title="Kernel (mach)"></a>Kernel (mach)</h4><p>在cpu运行时发生错误，会触发mach的异常处理程序exception_triage()，将异常转化为Mach消息。再调用exception_deliver()，将异常投递给thread、task以及host。<br>kernel的异常可以通过set_exception_ports系列系统调用进行监听(阻塞)</p>
+<h4 id="Native-Process-2"><a href="#Native-Process-2" class="headerlink" title="Native Process"></a>Native Process</h4><p>由于mach异常会通过bsd的包装再次以信号的形式发出，进程既可以直接使用kernel的方式阻塞监听mach的异常，也可以通过unix的信号机制，注册监听。</p>
+<h4 id="Runtime-Process-2"><a href="#Runtime-Process-2" class="headerlink" title="Runtime Process"></a>Runtime Process</h4><p>可以通过NSSetUncaughtExceptionHandler方式监听，实际上是对Signal监听的封装</p>
+<h4 id="Excecption-Collector-2"><a href="#Excecption-Collector-2" class="headerlink" title="Excecption Collector"></a>Excecption Collector</h4><p>ReportCrash被用于收集上报设备中发生的Crash事件。<br>Refs：<a href="https://help.apple.com/xcode/mac/current/#/dev675635e70" target="_blank" rel="noopener">https://help.apple.com/xcode/mac/current/#/dev675635e70</a><br>设备使能日志上传<br>云端使用App Store Connect</p>
+<h4 id="Recovery-API-2"><a href="#Recovery-API-2" class="headerlink" title="Recovery API"></a>Recovery API</h4><p>Recovery Attempter(MacOs)<br>Refs：<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ErrorHandlingCocoa/RecoverFromErrors/RecoverFromErrors.html#//apple_ref/doc/uid/TP40001806-CH206-BCIDEGGF" target="_blank" rel="noopener">https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ErrorHandlingCocoa/RecoverFromErrors/RecoverFromErrors.html#//apple_ref/doc/uid/TP40001806-CH206-BCIDEGGF</a></p>
+<h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3><p>Windows同样使用混合内核(微内核)。</p>
+<h4 id="Kernel"><a href="#Kernel" class="headerlink" title="Kernel"></a>Kernel</h4><p>由于windows闭源，未向开发者提供kernel的异常处理接口。并且大部分的kernel异常会直接在kernel中处理。例如蓝屏</p>
+<h4 id="Native-Process-3"><a href="#Native-Process-3" class="headerlink" title="Native Process"></a>Native Process</h4><p>通过SetUnhandledExceptionFilter监听进程异常</p>
+<h4 id="Runtime-Process-3"><a href="#Runtime-Process-3" class="headerlink" title="Runtime Process"></a>Runtime Process</h4><p>使用Runtime的机制处理异常</p>
+<h4 id="Excecption-Collector-3"><a href="#Excecption-Collector-3" class="headerlink" title="Excecption Collector"></a>Excecption Collector</h4><p>Windows Error Reporting，在UnhandledExceptionFilter通知WER服务分析完异常之后，会通知用户处理异常。</p>
+<h4 id="Recovery-API-3"><a href="#Recovery-API-3" class="headerlink" title="Recovery API"></a>Recovery API</h4><p>Last Known Good And SCM‘s FailureActions</p>
+<h3 id="Fuchsia"><a href="#Fuchsia" class="headerlink" title="Fuchsia"></a>Fuchsia</h3><p>Fuchsia使用名为Zircon的微内核，与darwin-xnu同样使用exception ports的概念来处理异常。任意thread、process以及jod均有自己的exception port</p>
+<h4 id="Kernel-1"><a href="#Kernel-1" class="headerlink" title="Kernel"></a>Kernel</h4><p>可以通过zx_task_bind_exception_port将自定的handler用于处理目标对象产生的异常</p>
+<h4 id="Native-Process-4"><a href="#Native-Process-4" class="headerlink" title="Native Process"></a>Native Process</h4><p>可以通过zx_task_bind_exception_port将自定的handler用于处理目标对象产生的异常<br>默认使用CrashService将Exception转发给用户态的crash analyzer处理</p>
+<h4 id="Runtime-Process-4"><a href="#Runtime-Process-4" class="headerlink" title="Runtime Process"></a>Runtime Process</h4><p>使用Runtime的机制处理异常<br>Dart：unhandled_exception_callback<br>转发给用户态的crash analyzer处理</p>
+<h4 id="Excecption-Collector-4"><a href="#Excecption-Collector-4" class="headerlink" title="Excecption Collector"></a>Excecption Collector</h4><p>crash analyzer生成crash report。</p>
+<h4 id="Recovery-API-4"><a href="#Recovery-API-4" class="headerlink" title="Recovery API"></a>Recovery API</h4><p>未提供异常恢复相关API</p>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2019/02/09/Exception-handling-in-different-os/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/02/09/Exception-handling-in-different-os/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2019/02/09/Exception-handling-in-different-os/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2019/01/13/Something-about-Crash-reporter-in-different-system/">
+        Something about Crash reporter in different system →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>

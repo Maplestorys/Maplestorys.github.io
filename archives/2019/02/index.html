@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <title>Archives: 2019 | MapleStory</title>
+  <title>Archives: 2019/2 | MapleStory</title>
   <meta name="description" content="" />
   <meta name="HandheldFriendly" content="True" />
   <meta name="MobileOptimized" content="320" />
@@ -57,58 +57,6 @@ Kernel (linux)在cpu运行时发生错误，linux为这类错误注册了默认�
       
       <p>
           <a href="/2019/02/09/Exception-handling-in-different-os/" class="excerpt-link">Read More...</a>
-      </p>
-      
-    </section>
-  </article>
-  
-  <article class="post">
-    <header class="post-header">
-      <span class="post-meta">
-      <time datetime="2019-01-13T06:57:22.000Z" itemprop="datePublished">
-          2019-01-13
-      </time>
-    
-</span>
-      <h2 class="post-title"><a href="/2019/01/13/Something-about-Crash-reporter-in-different-system/">Something about Crash reporter in different system</a></h2>
-    </header>
-    <section class="post-excerpt">
-      <p>
-      
-        通用这里所描述的都指的是用户态的crash，kernel的crash的处理方式略有区别。本文只是简述crash信息保存的流程。
-在linux系统上，应用异常是通过信号从内核通知上来的，在用户态注册的信号处理函数能够保存一些信息，在信号处理函数运行完成之后，kernel可能会进行一些core dump，这取决于配置。
-当用户态crash时，信号传递给预先注册的signal handler，这时crash尚处于active状态，signal
-      
-      </p>
-      
-      <p>
-          <a href="/2019/01/13/Something-about-Crash-reporter-in-different-system/" class="excerpt-link">Read More...</a>
-      </p>
-      
-    </section>
-  </article>
-  
-  <article class="post">
-    <header class="post-header">
-      <span class="post-meta">
-      <time datetime="2019-01-02T14:36:35.000Z" itemprop="datePublished">
-          2019-01-02
-      </time>
-    
-</span>
-      <h2 class="post-title"><a href="/2019/01/02/Statsd-In-android-9-3/">Statsd In android 9(3)</a></h2>
-    </header>
-    <section class="post-excerpt">
-      <p>
-      
-        前面已经介绍了statsd的接口以及调用流程，本篇介绍接口自动生成的代码。
-###StatsLogInternalframework/base/core仓中的StatsLogInternal.java会被编译到framework.jar中，因而会在编译该jar包前生成。查看framework/base/Android.bp
-1234567891011121314java_library &#123;    name: &quot;fra
-      
-      </p>
-      
-      <p>
-          <a href="/2019/01/02/Statsd-In-android-9-3/" class="excerpt-link">Read More...</a>
       </p>
       
     </section>
