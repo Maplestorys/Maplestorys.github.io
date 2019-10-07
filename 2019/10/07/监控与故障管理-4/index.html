@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <title>监控与故障管理(3) | MapleStory</title>
+  <title>监控与故障管理(4) | MapleStory</title>
   <meta name="description" content="" />
   <meta name="HandheldFriendly" content="True" />
   <meta name="MobileOptimized" content="320" />
@@ -39,15 +39,18 @@
 <main class="content" role="main">
   <article class="post">
     <span class="post-meta">
-      <time datetime="2019-09-25T14:32:19.000Z" itemprop="datePublished">
-          2019-09-25
+      <time datetime="2019-10-07T09:06:57.000Z" itemprop="datePublished">
+          2019-10-07
       </time>
     
 </span>
-    <h1 class="post-title">监控与故障管理(3)</h1>
+    <h1 class="post-title">监控与故障管理(4)</h1>
     <section class="post-content">
-      <p>错误恢复模式（参考书籍Patterns For Fault Tolerant Software第6章）：<br>1.故障隔离（Quarantine）<br>对故障的服务或者设备进行隔离，例如代理其提供的服务<br>2.集中恢复（Concentrated Recovery）<br>对重要恢复有显著的用户提示，避免误操作导致无法恢复的错误<br>3.Error Handler<br>错误处理器，例如UncautghtExceptionHandler<br>4.重启<br>重启进程，进程组或系统<br>5.回滚<br>返回进程、系统执行路径的前一个状态，当然，错误可能还会再次发生<br>6.放通<br>忽略掉错误<br>7.返回参考点<br>例如进程崩溃，进行了重启<br>8.有限次数重试<br>例如网络访问超时，再次发起请求<br>9.主备切换<br>10.检查点<br>周期保存进程或系统状态，对于单进程比较容易，但对于进程组或整机而言，需要选择一个时机进行状态保存。<br>当然，对于有依赖的进程，可以选择通过一系列依赖调用来进行保存。并且，保存的内容要恰好满足状态恢复的要求。<br>这就要求设计上把状态数据与其他数据区分开来。<br>11.数据重置<br>清除用户数据<br>以上恢复的方式是不是很眼熟，例如模式2，10在微软的Windows上都有对应的服务。<br>大部分编程语言都会提供Exception Handler的机制。<br>对于Android而言，模式2、4、7、11也有对应的机制或服务。</p>
-<p>容错模式（参考书籍Patterns For Fault Tolerant Software第7章）：<br>恢复模式会改变当前系统的状态，而容错模式保持当前系统状态而缓解因为故障带来的影响。<br>例如对于请求过载型可以采用以下模式<br>1.队列保持当前请求<br>2.负载均衡<br>3.丢弃部分请求<br>对于联网应用来说对于网络数据的校验也是一种容错模式。</p>
+      <p>从上面几篇叙述中可以了解到通用故障检测工具箱里应有的工具。<br>下面来简要描述App生命周期里与此相关的工具<br>开发阶段：<br>1.编程语言自带以及Os扩展的异常处理机制<br>Jdk UncaughtException<br>Android AndroidException及子类<br>2.运行期状态获取接口（Debug、Status、Usage）<br>3.编译器支持的Sanitizer<br>4.Android Studio及集成的工具</p>
+<p>调优阶段：<br>在开发者者选项中各个模块为调试所添加的开关，如<br>1.布局层级<br>2.渲染时间<br>独立提供的工具：<br>如adb，dumpsys，systrace，perfetto<br>最佳实践检查工具：<br>StrictMode API</p>
+<p>测试阶段：<br>如<br>1.Monkey<br>2.性能测试（benchmark Api）</p>
+<p>运维阶段：<br>由firebase提供的Android Vitals服务<br>包括崩溃，卡顿，功耗，数据访问延时监控的服务<br>这里值得一提的是Android Vitals提供的服务与框架并无耦合，与其他三方服务提供的监控方式类似。</p>
+<p>在以上工具以及采集的数据大部分是由框架中的组件采集的。<br>例如<br>1.debuggerd，tombstoned以及crashdump所组成的进程栈抓取工具<br>2.ANR组成的进程任务执行响应监控<br>3.SystemServer中的Watchdog监控关键资源响应延时<br>4.ART中提供的Debug功能<br>当然最近几个版本新 加入的一些工具的作用还未曾知晓，如statsd<br>AndroidX与Android Studio也是AOSP的一部分。</p>
 
     </section>
     <footer class="post-footer">
@@ -57,15 +60,15 @@
 </section>
       <section class="share">
     <h4>Share this post</h4>
-    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2019/09/25/监控与故障管理-3/"
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2019/10/07/监控与故障管理-4/"
        onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
         <span class="hidden">Twitter</span>
     </a>
-    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/09/25/监控与故障管理-3/"
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/10/07/监控与故障管理-4/"
        onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
         <span class="hidden">Facebook</span>
     </a>
-    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2019/09/25/监控与故障管理-3/"
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2019/10/07/监控与故障管理-4/"
        onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
         <span class="hidden">Google+</span>
     </a>
@@ -74,14 +77,14 @@
   </article>
   <nav class="pagination" role="pagination">
     
-    <a class="newer-posts" href="/2019/10/07/监控与故障管理-4/">
-        ← 监控与故障管理(4)
+    <a class="newer-posts" href="/2019/10/07/监控与故障管理-5/">
+        ← 监控与故障管理(5)
     </a>
     
     <span class="page-number">•</span>
     
-    <a class="older-posts" href="/2019/09/23/监控与故障管理-2/">
-        监控与故障管理(2) →
+    <a class="older-posts" href="/2019/09/25/监控与故障管理-3/">
+        监控与故障管理(3) →
     </a>
     
 </nav>
