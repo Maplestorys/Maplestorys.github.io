@@ -40,6 +40,35 @@
   <article class="post">
     <header class="post-header">
       <span class="post-meta">
+      <time datetime="2019-10-25T09:32:19.000Z" itemprop="datePublished">
+          2019-10-25
+      </time>
+    
+</span>
+      <h2 class="post-title"><a href="/2019/10/25/Input-Dispatch-Procedure-in-Android-10/">Touch Event Dispatch Procedure in Android 10</a></h2>
+    </header>
+    <section class="post-excerpt">
+      <p>
+      
+        触摸事件只会分发给可见的能够接受事件的窗口
+在P版本上相关的成员ViewRootImplWindowManagerServiceInputDispatcher
+Q版本相关的成员ViewRootImplWindowManagerServiceSurfaceFlingerInputDispatcher
+
+当前窗口在执行完onResume后由框架向WindowManagerService添加窗口，并开始接收Input事件
+1234567891
+      
+      </p>
+      
+      <p>
+          <a href="/2019/10/25/Input-Dispatch-Procedure-in-Android-10/" class="excerpt-link">Read More...</a>
+      </p>
+      
+    </section>
+  </article>
+  
+  <article class="post">
+    <header class="post-header">
+      <span class="post-meta">
       <time datetime="2019-10-07T11:17:57.000Z" itemprop="datePublished">
           2019-10-07
       </time>
@@ -260,36 +289,10 @@ Kernel (linux)在cpu运行时发生错误，linux为这类错误注册了默认�
     </section>
   </article>
   
-  <article class="post">
-    <header class="post-header">
-      <span class="post-meta">
-      <time datetime="2019-01-02T14:36:35.000Z" itemprop="datePublished">
-          2019-01-02
-      </time>
-    
-</span>
-      <h2 class="post-title"><a href="/2019/01/02/Statsd-In-android-9-3/">Statsd In android 9(3)</a></h2>
-    </header>
-    <section class="post-excerpt">
-      <p>
-      
-        前面已经介绍了statsd的接口以及调用流程，本篇介绍接口自动生成的代码。
-###StatsLogInternalframework/base/core仓中的StatsLogInternal.java会被编译到framework.jar中，因而会在编译该jar包前生成。查看framework/base/Android.bp
-1234567891011121314java_library &#123;    name: &quot;fra
-      
-      </p>
-      
-      <p>
-          <a href="/2019/01/02/Statsd-In-android-9-3/" class="excerpt-link">Read More...</a>
-      </p>
-      
-    </section>
-  </article>
-  
   <nav class="pagination" role="pagination">
     
-    <span class="page-number">Page 1 of 1</span>
-    
+    <span class="page-number">Page 1 of 2</span>
+    <a class="older-posts" href="/archives/2019/page/2/">Older Posts →</a>
   </nav>
 </main>
 
