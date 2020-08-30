@@ -40,6 +40,32 @@
   <article class="post">
     <header class="post-header">
       <span class="post-meta">
+      <time datetime="2019-01-13T06:57:22.000Z" itemprop="datePublished">
+          2019-01-13
+      </time>
+    
+</span>
+      <h2 class="post-title"><a href="/2019/01/13/Something-about-Crash-reporter-in-different-system/">Something about Crash reporter in different system</a></h2>
+    </header>
+    <section class="post-excerpt">
+      <p>
+      
+        通用这里所描述的都指的是用户态的crash，kernel的crash的处理方式略有区别。本文只是简述crash信息保存的流程。
+在linux系统上，应用异常是通过信号从内核通知上来的，在用户态注册的信号处理函数能够保存一些信息，在信号处理函数运行完成之后，kernel可能会进行一些core dump，这取决于配置。
+当用户态crash时，信号传递给预先注册的signal handler，这时crash尚处于active状态，signal
+      
+      </p>
+      
+      <p>
+          <a href="/2019/01/13/Something-about-Crash-reporter-in-different-system/" class="excerpt-link">Read More...</a>
+      </p>
+      
+    </section>
+  </article>
+  
+  <article class="post">
+    <header class="post-header">
+      <span class="post-meta">
       <time datetime="2019-01-02T14:36:35.000Z" itemprop="datePublished">
           2019-01-02
       </time>

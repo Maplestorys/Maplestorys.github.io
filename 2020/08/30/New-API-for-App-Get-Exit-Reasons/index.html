@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>New API for App Get Exit Reasons | MapleStory</title>
+  <meta name="description" content="" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+
+  <meta name="generator" content="MapleStory">
+
+  
+  
+  
+
+  
+</head>
+
+
+<body class="post-template">
+
+  <header class="site-head"  style="background-image: url(//maplestorys.github.io/img/banner.jpg)" >
+    <div class="vertical">
+        <div class="site-head-content inner">
+             <a class="blog-logo" href="/"><img src="//blog.ghost.org/content/images/2013/Nov/bloglogo_1-1.png" alt="Blog Logo"/></a> 
+            <h1 class="blog-title">MapleStory</h1>
+            <h2 class="blog-description"></h2>
+        </div>
+    </div>
+</header>
+  
+
+<main class="content" role="main">
+  <article class="post">
+    <span class="post-meta">
+      <time datetime="2020-08-30T14:47:12.000Z" itemprop="datePublished">
+          2020-08-30
+      </time>
+    
+</span>
+    <h1 class="post-title">New API for App Get Exit Reasons</h1>
+    <section class="post-content">
+      <p>ExampleCode:<br>‘’’<br>var mgr : ActivityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager<br>var list : MutableList<applicationexitinfo> = mgr.getHistoricalProcessExitReasons(null, 0,0)<br>Log.i(“Maple”, “ExitInfoList size:” + list.size);<br>for(item in list) {<br>    Log.i(“Maple”, “Item:” + item.toString());<br>    if (item.traceInputStream != null) {<br>        var reader = BufferedReader(item.traceInputStream?.reader())<br>        var content:String<br>        try {<br>            content = reader.readText()<br>            Log.i(“Maple”, “Trace:” + content);<br>        }finally {<br>            reader.close()<br>        }<br>    }<br>}<br>‘’’</applicationexitinfo></p>
+<p>Results:<br>‘’’<br>2020-08-30 22:41:26.268 19557-19557/com.maplestory.moewallpaper I/Maple: list size:11<br>2020-08-30 22:41:26.277 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:41 pid=19390 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=6 (ANR) status=0 importance=100 pss=80MB rss=143MB description=user request after error state=empty trace=null<br>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple: Trace:<br>    —– pid 19390 at 2020-08-30 22:41:14 —–<br>    Cmd line: com.maplestory.moewallpaper<br>    Build fingerprint: ‘google/walleye/walleye:11/RPB2.200611.009/6625208:user/release-keys’<br>    ABI: ‘arm64’<br>    Build type: optimized<br>    Zygote loaded classes=15764 post zygote classes=488<br>    Dumping registered class loaders</p>
+<pre><code>#0 dalvik.system.PathClassLoader: [], parent #1
+#1 java.lang.BootClassLoader: [], no parent
+#2 dalvik.system.PathClassLoader: [/data/app/~~AJ5EyenErJb8hnAAxTgXcQ==/com.maplestory.moewallpaper-Q-dp2ZicMU7g5NGQgWQqoA==/base.apk:/data/app/~~AJ5EyenErJb8hnAAxTgXcQ==/com.maplestory.moewallpaper-Q-dp2ZicMU7g5NGQgWQqoA==/base.apk!classes2.dex], parent #1
+Done dumping class loaders
+Classes initialized: 358 in 5.355ms
+Intern table: 31575 strong; 520 weak
+JNI: CheckJNI is on; globals=659 (plus 42 weak)
+Libraries: libandroid.so libaudioeffect_jni.so libcompiler_rt.so libicu_jni.so libjavacore.so libjavacrypto.so libjnigraphics.so libmedia_jni.so libopenjdk.so librs_jni.so libsfplugin_ccodec.so libsoundpool.so libstats_jni.so libwebviewchromium_loader.so (14)
+Heap: 44% free, 2645KB/4805KB; 68790 objects
+Dumping cumulative Gc timings
+Start Dumping histograms for 1 iterations for concurrent copying
+ProcessMarkStack:    Sum: 3.267ms 99% C.I. 3.267ms-3.267ms Avg: 3.267ms Max: 3.267ms
+VisitConcurrentRoots:    Sum: 3.017ms 99% C.I. 1.499ms-1.518ms Avg: 1.508ms Max: 1.518ms
+ScanImmuneSpaces:    Sum: 2.299ms 99% C.I. 0.023ms-2.276ms Avg: 1.149ms Max: 2.276ms
+MarkingPhase:    Sum: 1.505ms 99% C.I. 1.505ms-1.505ms Avg: 1.505ms Max: 1.505ms
+SweepSystemWeaks:    Sum: 761us 99% C.I. 761us-761us Avg: 761us Max: 761us
+InitializePhase:    Sum: 733us 99% C.I. 733us-733us Avg: 733us Max: 733us
+ClearFromSpace:    Sum: 284us 99% C.I. 284us-284us Avg: 284us Max: 284us
+GrayAllDirtyImmuneObjects:    Sum: 248us 99% C.I. 248us-248us Avg: 248us Max: 248us
+CaptureThreadRootsForMarking:    Sum: 131us 99% C.I. 131us-131us Avg: 131us Max: 131us
+ScanCardsForSpace:    Sum: 108us 99% C.I. 108us-108us Avg: 108us Max: 108us
+VisitNonThreadRoots:    Sum: 93us 99% C.I. 43us-50us Avg: 46.500us Max: 50us
+EnqueueFinalizerReferences:    Sum: 89us 99% C.I. 89us-89us Avg: 89us Max: 89us
+FlipOtherThreads:    Sum: 76us 99% C.I. 76us-76us Avg: 76us Max: 76us
+MarkZygoteLargeObjects:    Sum: 54us 99% C.I. 54us-54us Avg: 54us Max: 54us
+ProcessReferences:    Sum: 49us 99% C.I. 1us-48us Avg: 24.500us Max: 48us
+SweepAllocSpace:    Sum: 31us 99% C.I. 31us-31us Avg: 31us Max: 31us
+SweepLargeObjects:    Sum: 29us 99% C.I. 29us-29us Avg: 29us Max: 29us
+MarkStackAsLive:    Sum: 24us 99% C.I. 24us-24us Avg: 24us Max: 24us
+CopyingPhase:    Sum: 16us 99% C.I. 16us-16us Avg: 16us Max: 16us
+(Paused)GrayAllNewlyDirtyImmuneObjects:    Sum: 14us 99% C.I. 14us-14us Avg: 14us Max: 14us
+EmptyRBMarkBitStack:    Sum: 12us 99% C.I. 12us-12us Avg: 12us Max: 12us
+ThreadListFlip:    Sum: 11us 99% C.I. 11us-11us Avg: 11us Max: 11us
+ReclaimPhase:    Sum: 9us 99% C.I. 9us-9us Avg: 9us Max: 9us
+(Paused)ClearCards:    Sum: 3us 99% C.I. 250ns-2000ns Avg: 230ns Max: 2000ns
+(Paused)FlipCallback:    Sum: 2us 99% C.I. 2us-2us Avg: 2us Max: 2us
+ResumeOtherThreads:    Sum: 0 99% C.I. 0ns-0ns Avg: 0ns Max: 0ns
+Done Dumping histograms
+concurrent copying paused:    Sum: 33us 99% C.I. 33us-33us Avg: 33us Max: 33us
+concurrent copying freed-bytes: Avg: 2803KB Max: 2803KB Min: 2803KB
+Freed-bytes histogram: 2560:1
+concurrent copying total time: 13.028ms mean time: 13.028ms
+concurrent copying freed: 43322 objects with total size 2803KB
+concurrent copying throughput: 3.33246e+06/s / 210MB/s  per cpu-time: 239198666/s / 228MB/s
+Average major GC reclaim bytes ratio 1.30548 over 1 GC cycles
+Average major GC copied live bytes ratio 0.622111 over 5 major GCs
+Cumulative bytes moved 12685104
+Cumulative objects moved 227401
+Peak regions allocated 27 (6912KB) / 768 (192MB)
+Average minor GC reclaim bytes ratio inf over 0 GC cycles
+Average minor GC copied live bytes ratio 0.135833 over 1 minor GCs
+Cumulative bytes moved 551920
+Cumulative objects moved 10954
+Peak regions allocated 27 (6912KB) / 768 (192MB)
+Total time spent in GC: 13.028ms
+</code></pre><p>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple: Mean GC size throughput: 210MB/s per cpu-time: 227MB/s<br>    Mean GC object throughput: 3.3253e+06 objects/s<br>    Total number of allocations 112112<br>    Total bytes allocated 5448KB<br>    Total bytes freed 2803KB<br>    Free memory 2159KB<br>    Free memory until GC 2159KB<br>    Free memory until OOME 189MB<br>    Total memory 4805KB<br>    Max memory 192MB<br>    Zygote space size 3180KB<br>    Total mutator paused time: 33us<br>    Total time waiting for GC to complete: 5.779us<br>    Total GC count: 1<br>    Total GC time: 13.028ms<br>    Total blocking GC count: 0<br>    Total blocking GC time: 0<br>    Native bytes total: 11104220 registered: 197580<br>    Total native bytes at last GC: 10375464<br>    /system/framework/oat/arm64/android.hidl.base-V1.0-java.odex: quicken<br>    /system/framework/oat/arm64/android.hidl.manager-V1.0-java.odex: quicken<br>    /system/framework/oat/arm64/android.test.base.odex: quicken<br>    Current JIT code cache size (used / resident): 28KB / 32KB<br>    Current JIT data cache size (used / resident): 50KB / 56KB<br>    Zygote JIT code cache size (at point of fork): 43KB / 48KB<br>    Zygote JIT data cache size (at point of fork): 40KB / 44KB<br>    Current JIT mini-debug-info size: 61KB<br>    Current JIT capacity: 64KB<br>    Current number of JIT JNI stub entries: 0<br>    Current number of JIT code cache entries: 95<br>    Total number of JIT compilations: 59<br>    Total number of JIT compilations for on stack replacement: 0<br>    Total number of JIT code cache collections: 0<br>    Memory used for stack maps: Avg: 110B Max: 1368B Min: 16B<br>    Memory used for compiled code: Avg: 481B Max: 4928B Min: 20B<br>    Memory used for profiling info: Avg: 114B Max: 1736B Min: 32B<br>    Start Dumping histograms for 95 iterations for JIT timings<br>    Compiling:    Sum: 87.678ms 99% C.I. 125us-5855us Avg: 922.926us Max: 6896us<br>    TrimMaps:    Sum: 3.034ms 99% C.I. 8us-152.500us Avg: 31.936us Max: 189us<br>    Done Dumping histograms<br>    Memory used for compilation: Avg: 92KB Max: 604KB Min: 15KB<br>    ProfileSaver total_bytes_written=0<br>    ProfileSaver total_number_of_writes=0<br>    ProfileSaver total_number_of_code_cache_queries=0<br>    ProfileSaver total_number_of_skipped_writes=0<br>    ProfileSaver total_number_of_failed_writes=0<br>    ProfileSaver total_ms_of_sleep=5000<br>    ProfileSaver total_ms_of_work=0<br>    ProfileSaver total_number_of_hot_spikes=0<br>    ProfileSaver total_number_of_wake_ups=0</p>
+<pre><code>suspend all histogram:    Sum: 80us 99% C.I. 1us-22us Avg: 7.272us Max: 22us
+DALVIK THREADS (14):
+&quot;Signal Catcher&quot; daemon prio=10 tid=6 Runnable
+  | group=&quot;system&quot; sCount=0 dsCount=0 flags=0 obj=0x13140268 self=0x781b687be0
+  | sysTid=19402 nice=-20 cgrp=default sched=0/0 handle=0x76990c9cc0
+  | state=R schedstat=( 34897969 2962968 13 ) utm=1 stm=1 core=5 HZ=100
+  | stack=0x7698fd2000-0x7698fd4000 stackSize=995KB
+  | held mutexes= &quot;mutator lock&quot;(shared held)
+  native: #00 pc 00000000004a5474  /apex/com.android.art/lib64/libart.so (art::DumpNativeStack(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;, int, BacktraceMap*, char const*, art::ArtMethod*, void*, bool)+140)
+  native: #01 pc 00000000005b4334  /apex/com.android.art/lib64/libart.so (art::Thread::DumpStack(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;, bool, BacktraceMap*, bool) const+372)
+  native: #02 pc 00000000005d18d4  /apex/com.android.art/lib64/libart.so (art::DumpCheckpoint::Run(art::Thread*)+924)
+  native: #03 pc 00000000005cb744  /apex/com.android.art/lib64/libart.so (art::ThreadList::RunCheckpoint(art::Closure*, art::Closure*)+532)
+  native: #04 pc 00000000005ca8c4  /apex/com.android.art/lib64/libart.so (art::ThreadList::Dump(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;, bool)+1876)
+  native: #05 pc 00000000005c9d80  /apex/com.android.art/lib64/libart.so (art::ThreadList::DumpForSigQuit(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;)+792)
+  native: #06 pc 0000000000575124  /apex/com.android.art/lib64/libart.so (art::Runtime::DumpForSigQuit(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt; &gt;&amp;)+196)
+  native: #07 pc 000000000058abac  /apex/com.android.art/lib64/libart.so (art::SignalCatcher::HandleSigQuit()+1396)
+</code></pre><p>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple:   native: #08 pc 0000000000589b44  /apex/com.android.art/lib64/libart.so (art::SignalCatcher::Run(void<em>)+348)<br>      native: #09 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void</em>)+64)<br>      native: #10 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)<br>      (no managed stack frames)</p>
+<pre><code>&quot;main&quot; prio=5 tid=1 Sleeping
+  | group=&quot;main&quot; sCount=1 dsCount=0 flags=1 obj=0x722a11d8 self=0x781b686010
+  | sysTid=19390 nice=-10 cgrp=default sched=0/0 handle=0x7941eee4f8
+  | state=S schedstat=( 443395835 25955369 347 ) utm=38 stm=5 core=4 HZ=100
+  | stack=0x7ffac00000-0x7ffac02000 stackSize=8192KB
+  | held mutexes=
+    at java.lang.Thread.sleep(Native method)
+  - sleeping on &lt;0x0c3332c8&gt; (a java.lang.Object)
+    at java.lang.Thread.sleep(Thread.java:442)
+  - locked &lt;0x0c3332c8&gt; (a java.lang.Object)
+    at java.lang.Thread.sleep(Thread.java:358)
+    at com.maplestory.moewallpaper.ui.dashboard.DashboardFragment$onCreateView$2.onClick(DashboardFragment.kt:33)
+    at android.view.View.performClick(View.java:7448)
+    at android.view.View.performClickInternal(View.java:7425)
+    at android.view.View.access$3600(View.java:810)
+    at android.view.View$PerformClick.run(View.java:28296)
+    at android.os.Handler.handleCallback(Handler.java:938)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loop(Looper.java:223)
+    at android.app.ActivityThread.main(ActivityThread.java:7656)
+    at java.lang.reflect.Method.invoke(Native method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+
+&quot;perfetto_hprof_listener&quot; prio=10 tid=7 Native (still starting up)
+  | group=&quot;&quot; sCount=1 dsCount=0 flags=1 obj=0x0 self=0x781b6a0140
+  | sysTid=19403 nice=-20 cgrp=default sched=0/0 handle=0x7697fcbcc0
+  | state=S schedstat=( 203540 0 8 ) utm=0 stm=0 core=5 HZ=100
+  | stack=0x7697ed4000-0x7697ed6000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000009b224  /apex/com.android.runtime/lib64/bionic/libc.so (read+4)
+  native: #01 pc 0000000000017e20  /apex/com.android.art/lib64/libperfetto_hprof.so (void* std::__1::__thread_proxy&lt;std::__1::tuple&lt;std::__1::unique_ptr&lt;std::__1::__thread_struct, std::__1::default_delete&lt;std::__1::__thread_struct&gt; &gt;, ArtPlugin_Initialize::$_29&gt; &gt;(void*)+280)
+  native: #02 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+64)
+  native: #03 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)
+  (no managed stack frames)
+
+&quot;ADB-JDWP Connection Control Thread&quot; daemon prio=0 tid=8 WaitingInMainDebuggerLoop
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x131402e0 self=0x781b68eb20
+  | sysTid=19404 nice=-20 cgrp=default sched=0/0 handle=0x7697ecdcc0
+  | state=S schedstat=( 1635367 46823 14 ) utm=0 stm=0 core=5 HZ=100
+  | stack=0x7697dd6000-0x7697dd8000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000009c568  /apex/com.android.runtime/lib64/bionic/libc.so (__ppoll+8)
+  native: #01 pc 000000000005a27c  /apex/com.android.runtime/lib64/bionic/libc.so (poll+92)
+  native: #02 pc 0000000000009fc4  /apex/com.android.art/lib64/libadbconnection.so (adbconnection::AdbConnectionState::RunPollLoop(art::Thread*)+812)
+  native: #03 pc 00000000000085f8  /apex/com.android.art/lib64/libadbconnection.so (adbconnection::CallbackFunction(void*)+1512)
+  native: #04 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+64)
+  native: #05 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)
+  (no managed stack frames)
+
+&quot;Jit thread pool worker thread 0&quot; daemon prio=5 tid=9 Native
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x13140358 self=0x781b697630
+  | sysTid=19405 nice=0 cgrp=default sched=0/0 handle=0x764c29cd00
+  | state=S schedstat=( 47737405 6765880 85 ) utm=3 stm=0 core=5 HZ=100
+  | stack=0x764c19e000-0x764c1a0000 stackSize=1023KB
+</code></pre><p>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple:   | held mutexes=<br>      native: #00 pc 000000000004b00c  /apex/com.android.runtime/lib64/bionic/libc.so (syscall+28)<br>      native: #01 pc 00000000001b079c  /apex/com.android.art/lib64/libart.so (art::ConditionVariable::WaitHoldingLocks(art::Thread<em>)+148)<br>      native: #02 pc 00000000005d3630  /apex/com.android.art/lib64/libart.so (art::ThreadPool::GetTask(art::Thread</em>)+120)<br>      native: #03 pc 00000000005d28b8  /apex/com.android.art/lib64/libart.so (art::ThreadPoolWorker::Run()+144)<br>      native: #04 pc 00000000005d2378  /apex/com.android.art/lib64/libart.so (art::ThreadPoolWorker::Callback(void<em>)+192)<br>      native: #05 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void</em>)+64)<br>      native: #06 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)<br>      (no managed stack frames)</p>
+<pre><code>&quot;HeapTaskDaemon&quot; daemon prio=5 tid=10 WaitingForTaskProcessor
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x13140790 self=0x781b69e570
+  | sysTid=19406 nice=4 cgrp=default sched=0/0 handle=0x764b197cc0
+  | state=S schedstat=( 16350470 1177184 40 ) utm=0 stm=0 core=4 HZ=100
+  | stack=0x764b094000-0x764b096000 stackSize=1043KB
+  | held mutexes=
+  native: #00 pc 000000000004b00c  /apex/com.android.runtime/lib64/bionic/libc.so (syscall+28)
+  native: #01 pc 00000000001b079c  /apex/com.android.art/lib64/libart.so (art::ConditionVariable::WaitHoldingLocks(art::Thread*)+148)
+  native: #02 pc 00000000002e86a4  /apex/com.android.art/lib64/libart.so (art::gc::TaskProcessor::GetTask(art::Thread*)+548)
+  native: #03 pc 00000000002e8ff4  /apex/com.android.art/lib64/libart.so (art::gc::TaskProcessor::RunAllTasks(art::Thread*)+92)
+    at dalvik.system.VMRuntime.runHeapTasks(Native method)
+    at java.lang.Daemons$HeapTaskDaemon.runInternal(Daemons.java:531)
+    at java.lang.Daemons$Daemon.run(Daemons.java:139)
+    at java.lang.Thread.run(Thread.java:923)
+
+&quot;ReferenceQueueDaemon&quot; daemon prio=5 tid=11 Waiting
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x131403d0 self=0x781b69add0
+  | sysTid=19407 nice=4 cgrp=default sched=0/0 handle=0x764a08dcc0
+  | state=S schedstat=( 397761 34999 5 ) utm=0 stm=0 core=4 HZ=100
+  | stack=0x7649f8a000-0x7649f8c000 stackSize=1043KB
+  | held mutexes=
+    at java.lang.Object.wait(Native method)
+  - waiting on &lt;0x09f5bf61&gt; (a java.lang.Class&lt;java.lang.ref.ReferenceQueue&gt;)
+    at java.lang.Object.wait(Object.java:442)
+    at java.lang.Object.wait(Object.java:568)
+    at java.lang.Daemons$ReferenceQueueDaemon.runInternal(Daemons.java:217)
+  - locked &lt;0x09f5bf61&gt; (a java.lang.Class&lt;java.lang.ref.ReferenceQueue&gt;)
+    at java.lang.Daemons$Daemon.run(Daemons.java:139)
+    at java.lang.Thread.run(Thread.java:923)
+
+&quot;FinalizerDaemon&quot; daemon prio=5 tid=12 Waiting
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x13140448 self=0x781b69c9a0
+  | sysTid=19408 nice=4 cgrp=default sched=0/0 handle=0x7649f83cc0
+  | state=S schedstat=( 702865 110207 8 ) utm=0 stm=0 core=5 HZ=100
+  | stack=0x7649e80000-0x7649e82000 stackSize=1043KB
+  | held mutexes=
+    at java.lang.Object.wait(Native method)
+  - waiting on &lt;0x03f83a86&gt; (a java.lang.Object)
+    at java.lang.Object.wait(Object.java:442)
+    at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:190)
+  - locked &lt;0x03f83a86&gt; (a java.lang.Object)
+    at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:211)
+    at java.lang.Daemons$FinalizerDaemon.runInternal(Daemons.java:273)
+    at java.lang.Daemons$Daemon.run(Daemons.java:139)
+    at java.lang.Thread.run(Thread.java:923)
+
+&quot;FinalizerWatchdogDaemon&quot; daemon prio=5 tid=13 Sleeping
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x131404c0 self=0x781b6a1d10
+  | sysTid=19409 nice=4 cgrp=default sched=0/0 handle=0x7647e79cc0
+  | state=S schedstat=( 139950 234219 11 ) utm=0 stm=0 core=4 HZ=100
+  | stack=0x7647d76000-0x7647d78000 stackSize=1043KB
+  | held mutexes=
+    at java.lang.Thread.sleep(Native method)
+  - sleeping on &lt;0x0c29ef47&gt; (a java.lang.Object)
+    at java.lang.Thread.sleep(Thread.java:442)
+  - locked &lt;0x0c29ef47&gt; (a java.lang.Object)
+</code></pre><p>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple:     at java.lang.Thread.sleep(Thread.java:358)<br>        at java.lang.Daemons$FinalizerWatchdogDaemon.sleepForNanos(Daemons.java:390)<br>        at java.lang.Daemons$FinalizerWatchdogDaemon.waitForFinalization(Daemons.java:419)<br>        at java.lang.Daemons$FinalizerWatchdogDaemon.runInternal(Daemons.java:325)<br>        at java.lang.Daemons$Daemon.run(Daemons.java:139)<br>        at java.lang.Thread.run(Thread.java:923)</p>
+<pre><code>&quot;Binder:19390_1&quot; prio=5 tid=14 Native
+  | group=&quot;main&quot; sCount=1 dsCount=0 flags=1 obj=0x13140538 self=0x781b6a7080
+  | sysTid=19413 nice=0 cgrp=default sched=0/0 handle=0x7646c71cc0
+  | state=S schedstat=( 12456981 6410729 53 ) utm=0 stm=0 core=0 HZ=100
+  | stack=0x7646b7a000-0x7646b7c000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000009b4a4  /apex/com.android.runtime/lib64/bionic/libc.so (__ioctl+4)
+  native: #01 pc 0000000000057bb8  /apex/com.android.runtime/lib64/bionic/libc.so (ioctl+160)
+  native: #02 pc 0000000000050c6c  /system/lib64/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+300)
+  native: #03 pc 0000000000050e60  /system/lib64/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+24)
+  native: #04 pc 0000000000051724  /system/lib64/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+60)
+  native: #05 pc 0000000000077b60  /system/lib64/libbinder.so (android::PoolThread::threadLoop()+24)
+  native: #06 pc 000000000001564c  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+260)
+  native: #07 pc 00000000000a0d3c  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::javaThreadShell(void*)+140)
+  native: #08 pc 0000000000014ee4  /system/lib64/libutils.so (thread_data_t::trampoline(thread_data_t const*)+412)
+  native: #09 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+64)
+  native: #10 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)
+  (no managed stack frames)
+
+&quot;Binder:19390_2&quot; prio=5 tid=15 Native
+  | group=&quot;main&quot; sCount=1 dsCount=0 flags=1 obj=0x131405b0 self=0x781b6a54b0
+  | sysTid=19414 nice=0 cgrp=default sched=0/0 handle=0x7645b73cc0
+  | state=S schedstat=( 555782 327865 11 ) utm=0 stm=0 core=5 HZ=100
+  | stack=0x7645a7c000-0x7645a7e000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000009b4a4  /apex/com.android.runtime/lib64/bionic/libc.so (__ioctl+4)
+  native: #01 pc 0000000000057bb8  /apex/com.android.runtime/lib64/bionic/libc.so (ioctl+160)
+  native: #02 pc 0000000000050c6c  /system/lib64/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+300)
+  native: #03 pc 0000000000050e60  /system/lib64/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+24)
+  native: #04 pc 0000000000051724  /system/lib64/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+60)
+  native: #05 pc 0000000000077b60  /system/lib64/libbinder.so (android::PoolThread::threadLoop()+24)
+  native: #06 pc 000000000001564c  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+260)
+  native: #07 pc 00000000000a0d3c  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::javaThreadShell(void*)+140)
+  native: #08 pc 0000000000014ee4  /system/lib64/libutils.so (thread_data_t::trampoline(thread_data_t const*)+412)
+  native: #09 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+64)
+  native: #10 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)
+  (no managed stack frames)
+
+&quot;Binder:19390_3&quot; prio=5 tid=16 Native
+  | group=&quot;main&quot; sCount=1 dsCount=0 flags=1 obj=0x13140628 self=0x781b6a38e0
+  | sysTid=19415 nice=0 cgrp=default sched=0/0 handle=0x7644a75cc0
+  | state=S schedstat=( 822032 2271563 13 ) utm=0 stm=0 core=5 HZ=100
+  | stack=0x764497e000-0x7644980000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000009b4a4  /apex/com.android.runtime/lib64/bionic/libc.so (__ioctl+4)
+  native: #01 pc 0000000000057bb8  /apex/com.android.runtime/lib64/bionic/libc.so (ioctl+160)
+</code></pre><p>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple:   native: #02 pc 0000000000050c6c  /system/lib64/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+300)<br>      native: #03 pc 0000000000050e60  /system/lib64/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+24)<br>      native: #04 pc 0000000000051724  /system/lib64/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+60)<br>      native: #05 pc 0000000000077b60  /system/lib64/libbinder.so (android::PoolThread::threadLoop()+24)<br>      native: #06 pc 000000000001564c  /system/lib64/libutils.so (android::Thread::_threadLoop(void<em>)+260)<br>      native: #07 pc 00000000000a0d3c  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::javaThreadShell(void</em>)+140)<br>      native: #08 pc 0000000000014ee4  /system/lib64/libutils.so (thread_data_t::trampoline(thread_data_t const<em>)+412)<br>      native: #09 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void</em>)+64)<br>      native: #10 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)<br>      (no managed stack frames)</p>
+<pre><code>&quot;Profile Saver&quot; daemon prio=5 tid=17 Native
+  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x131406a0 self=0x781b6adfc0
+  | sysTid=19435 nice=9 cgrp=default sched=0/0 handle=0x764339fcc0
+  | state=S schedstat=( 19171664 2131980 10 ) utm=1 stm=0 core=4 HZ=100
+  | stack=0x76432a8000-0x76432aa000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000004b00c  /apex/com.android.runtime/lib64/bionic/libc.so (syscall+28)
+  native: #01 pc 00000000001b079c  /apex/com.android.art/lib64/libart.so (art::ConditionVariable::WaitHoldingLocks(art::Thread*)+148)
+  native: #02 pc 000000000035805c  /apex/com.android.art/lib64/libart.so (art::ProfileSaver::Run()+484)
+  native: #03 pc 000000000035ce48  /apex/com.android.art/lib64/libart.so (art::ProfileSaver::RunProfileSaverThread(void*)+176)
+  native: #04 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+64)
+  native: #05 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)
+  (no managed stack frames)
+
+&quot;RenderThread&quot; daemon prio=7 tid=18 Native
+  | group=&quot;main&quot; sCount=1 dsCount=0 flags=1 obj=0x13140718 self=0x781b6ac3f0
+  | sysTid=19436 nice=-10 cgrp=default sched=0/0 handle=0x76422a1cc0
+  | state=S schedstat=( 193720468 12791772 280 ) utm=14 stm=4 core=4 HZ=100
+  | stack=0x76421aa000-0x76421ac000 stackSize=995KB
+  | held mutexes=
+  native: #00 pc 000000000009c468  /apex/com.android.runtime/lib64/bionic/libc.so (__epoll_pwait+8)
+  native: #01 pc 0000000000019d58  /system/lib64/libutils.so (android::Looper::pollInner(int)+184)
+  native: #02 pc 0000000000019c38  /system/lib64/libutils.so (android::Looper::pollOnce(int, int*, int*, void**)+112)
+  native: #03 pc 000000000020fe34  /system/lib64/libhwui.so (android::uirenderer::ThreadBase::waitForWork()+132)
+  native: #04 pc 0000000000231678  /system/lib64/libhwui.so (android::uirenderer::renderthread::RenderThread::threadLoop()+80)
+  native: #05 pc 000000000001564c  /system/lib64/libutils.so (android::Thread::_threadLoop(void*)+260)
+  native: #06 pc 0000000000014ee4  /system/lib64/libutils.so (thread_data_t::trampoline(thread_data_t const*)+412)
+  native: #07 pc 00000000000b05d8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+64)
+  native: #08 pc 00000000000500d0  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64)
+  (no managed stack frames)
+
+----- end 19390 -----
+
+----- Waiting Channels: pid 19390 at 2020-08-30 22:41:14 -----
+Cmd line: com.maplestory.moewallpaper
+
+sysTid=19390     futex_wait_queue_me
+sysTid=19402     do_sigtimedwait
+sysTid=19403     pipe_read
+sysTid=19404     do_sys_poll
+sysTid=19405     futex_wait_queue_me
+sysTid=19406     futex_wait_queue_me
+sysTid=19407     futex_wait_queue_me
+sysTid=19408     futex_wait_queue_me
+sysTid=19409     futex_wait_queue_me
+sysTid=19413     binder_thread_read
+sysTid=19414     binder_thread_read
+sysTid=19415     binder_thread_read
+sysTid=19435     futex_wait_queue_me
+sysTid=19436     SyS_epoll_wait
+</code></pre><p>2020-08-30 22:41:26.281 19557-19557/com.maplestory.moewallpaper I/Maple: —– end 19390 —–<br>2020-08-30 22:41:26.282 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:41 pid=19224 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=10 (USER REQUESTED) status=0 importance=100 pss=76MB rss=140MB description=stop com.maplestory.moewallpaper due to from pid 19333 state=empty trace=null<br>2020-08-30 22:41:26.284 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:40 pid=19081 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=10 (USER REQUESTED) status=0 importance=100 pss=57MB rss=118MB description=stop com.maplestory.moewallpaper due to from pid 19169 state=empty trace=null<br>2020-08-30 22:41:26.285 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:38 pid=18926 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=4 (APP CRASH(EXCEPTION)) status=0 importance=100 pss=0.00 rss=0.00 description=crash state=empty trace=null<br>2020-08-30 22:41:26.286 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:38 pid=18718 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=10 (USER REQUESTED) status=0 importance=100 pss=54MB rss=112MB description=stop com.maplestory.moewallpaper due to from pid 18864 state=empty trace=null<br>2020-08-30 22:41:26.287 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:34 pid=18584 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=4 (APP CRASH(EXCEPTION)) status=0 importance=100 pss=57MB rss=119MB description=crash state=empty trace=null<br>2020-08-30 22:41:26.288 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:33 pid=18428 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=10 (USER REQUESTED) status=0 importance=100 pss=57MB rss=119MB description=stop com.maplestory.moewallpaper due to from pid 18523 state=empty trace=null<br>2020-08-30 22:41:26.289 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:19 pid=17902 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=4 (APP CRASH(EXCEPTION)) status=0 importance=100 pss=0.00 rss=0.00 description=crash state=empty trace=null<br>2020-08-30 22:41:26.290 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:13 pid=17195 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=4 (APP CRASH(EXCEPTION)) status=0 importance=100 pss=0.00 rss=0.00 description=crash state=empty trace=null<br>2020-08-30 22:41:26.291 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:13 pid=16841 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=10 (USER REQUESTED) status=0 importance=100 pss=73MB rss=137MB description=stop com.maplestory.moewallpaper due to from pid 17101 state=empty trace=null<br>2020-08-30 22:41:26.292 19557-19557/com.maplestory.moewallpaper I/Maple: item:ApplicationExitInfo(timestamp=2020/8/30 下午10:07 pid=16577 realUid=10011 packageUid=10011 definingUid=10011 user=0 process=com.maplestory.moewallpaper reason=10 (USER REQUESTED) status=0 importance=100 pss=57MB rss=120MB description=stop com.maplestory.moewallpaper due to from pid 16766 state=empty trace=null</p>
+<p>‘’’</p>
+
+    </section>
+    <footer class="post-footer">
+      <section class="author">
+    <h4>MapleStory.zeng</h4>
+    <p>A fresh Programer, now working on Android Frameworks.</p>
+</section>
+      <section class="share">
+    <h4>Share this post</h4>
+    <a class="icon-twitter" href="http://twitter.com/share?url=http://yoursite.com/2020/08/30/New-API-for-App-Get-Exit-Reasons/"
+       onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+    </a>
+    <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2020/08/30/New-API-for-App-Get-Exit-Reasons/"
+       onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+        <span class="hidden">Facebook</span>
+    </a>
+    <a class="icon-google-plus" href="https://plus.google.com/share?url=http://yoursite.com/2020/08/30/New-API-for-App-Get-Exit-Reasons/"
+       onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+        <span class="hidden">Google+</span>
+    </a>
+</section>
+    </footer>
+  </article>
+  <nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2019/10/25/Input-Dispatch-Procedure-in-Android-10/">
+        Touch Event Dispatch Procedure in Android 10 →
+    </a>
+    
+</nav>
+  <div id="comment" class="comments-area">
+    <h1 class="title"><a href="#disqus_comments" name="disqus_comments">Comments</a></h1>
+
+    
+</div>
+</main>
+
+
+  
+<footer class="site-footer">
+  
+  <div class="inner">
+     <section class="copyright">All content copyright <a href="/">MapleStory</a> &copy; 2014 &bull; All rights reserved.</section>
+     <section class="poweredby">Proudly published with <a class="icon-ghost" href="http://zespia.tw/hexo/">Hexo</a></section>
+  </div>
+</footer>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+
+
+
+
+
+
+</body>
+</html>
